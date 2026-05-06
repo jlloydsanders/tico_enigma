@@ -28,7 +28,7 @@ human_message = HumanMessagePromptTemplate.from_template(human_template)
 # 3. Compile the chat template
 chat_template = ChatPromptTemplate.from_messages([system_message, human_message])
 
-# 4. Format and print to test your variables
+# 4. Format and print to tests your variables
 # We will use a mock paragraph from our earlier tests
 mock_context = "Rojas began his search systematically, tearing through the minimalist furniture. The bedroom closet held three bespoke suits, all empty."
 
