@@ -1,41 +1,5 @@
-import os
-from datetime import datetime, timedelta
-
-import pytest
-from app.services.mastery_service import MasteryService
 import sqlite3
-from app.database import init_db, get_db_connection
-
-# A temporary DB for testing
-TEST_DB = "test_tico.db"
-
-
-@pytest.fixture()
-def service():
-    """Create a fresh database before every test and delete it after."""
-    # This is a 'Principal' pattern: clean slate for every test
-    if os.path.exists(TEST_DB):
-        os.remove(TEST_DB)
-
-    # We need a way to tell init_db which file to use
-    # For now, let's just manually init it for the test
-
-    conn = sqlite3.connect(TEST_DB)
-    conn.execute("""
-        CREATE TABLE user_progress (
-            node_id TEXT PRIMARY KEY,
-            reps INTEGER,
-            easiness_factor REAL,
-            interval INTEGER,
-            next_review DATETIME
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-    yield MasteryService(db_path=TEST_DB)
-
-    os.remove(TEST_DB)
+from datetime import datetime, timedelta
 
 
 def test_new_word_insertion(service):
@@ -51,7 +15,7 @@ def test_new_word_insertion(service):
     assert state.interval == 1
 
     # Verify the database actually saved it
-    conn = sqlite3.connect(TEST_DB)
+    conn = sqlite3.connect(service.db_path)
     conn.row_factory = sqlite3.Row
     row = conn.execute("SELECT * FROM user_progress WHERE node_id = ?", (node_id,)).fetchone()
     conn.close()
@@ -125,3 +89,4 @@ def test_retrieve_non_empty_word_list(service):
     wordlist = service.get_due_nodes(current_time=future_time)
 
     assert len(wordlist) == 3
+

@@ -1,3 +1,4 @@
+from app.services.dictionary_engine import DictionaryEntry
 from app.services.srs_engine import SRSState, SRSEngine
 from app.database import get_db_connection
 from datetime import datetime, timedelta
@@ -52,10 +53,6 @@ class MasteryService:
         conn = get_db_connection(self.db_path)
         cursor = conn.cursor()
 
-        # 1. Fetch current state
-        query = "SELECT node_id FROM user_progress WHERE next_review <= ? ORDER BY next_review"
-        review_list = cursor.execute(query, (current_time,)).fetchall()
-
         # Query using the limit parameter
         query = "SELECT node_id FROM user_progress WHERE next_review <= ? ORDER BY next_review LIMIT ?"
         rows = cursor.execute(query, (current_time, limit)).fetchall()
@@ -66,3 +63,34 @@ class MasteryService:
         conn.close()
 
         return review_list
+
+    def get_dictionary_entry(self, node_id: str) -> DictionaryEntry:
+        conn = get_db_connection(self.db_path)
+        cursor = conn.cursor()
+
+        query = """SELECT * FROM dictionary WHERE node_id = ?"""
+        row = cursor.execute(query, (node_id,)).fetchone()
+
+        dictionary_entry = DictionaryEntry.from_row(row)
+
+        conn.close()
+
+        return dictionary_entry
+
+    def save_dictionary_entry(self, dictionary_entry: DictionaryEntry) -> None:
+        conn = get_db_connection(self.db_path)
+        cursor = conn.cursor()
+
+        save_query = """
+                    INSERT INTO dictionary (node_id, spanish, english, example_sentences)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(node_id) DO UPDATE SET
+                        spanish=excluded.spanish,
+                        english=excluded.english,
+                        example_sentences=excluded.example_sentences
+                """
+
+        cursor.execute(save_query, (dictionary_entry.node_id, dictionary_entry.spanish,dictionary_entry.english, dictionary_entry.example_sentences,))
+
+        conn.commit()
+        conn.close()

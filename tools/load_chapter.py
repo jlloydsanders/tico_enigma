@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     # 2. Use the absolute path strategy for the database directory
     script_dir = Path(__file__).parent.resolve()
-    db_path = script_dir.parent / "data" / "tico_enigma_db"
+    db_path = script_dir.parent / "data" / "story_vector_brain"
 
     # 3. Ingest documents into Chroma
     vector_store = Chroma.from_documents(
