@@ -1,11 +1,11 @@
 from app.services.dictionary_engine import DictionaryEntry
 from app.services.srs_engine import SRSState, SRSEngine
-from app.database import get_db_connection
+from app.database import get_db_connection, DB_PATH
 from datetime import datetime, timedelta
 
 
 class MasteryService:
-    def __init__(self, db_path: str = "tico_enigma.db"):
+    def __init__(self, db_path=DB_PATH):
         self.db_path = db_path
         
     def update_node_mastery(self, node_id: str, quality: int) -> SRSState:
